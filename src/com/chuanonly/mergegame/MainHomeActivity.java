@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class MainHomeActivity extends Activity {
@@ -21,8 +22,8 @@ public class MainHomeActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		root = (LinearLayout) findViewById(R.id.container);
-		root.setBackgroundColor(0xfffaf8ef);
+//		root = (RelativeLayout) findViewById(R.id.container);
+//		root.setBackgroundColor(0xfffaf8ef);
 
 		tvScore = (TextView) findViewById(R.id.tvScore);
 		tvBestScore = (TextView) findViewById(R.id.tvBestScore);
@@ -75,7 +76,6 @@ public class MainHomeActivity extends Activity {
 
 	private int score = 0;
 	private TextView tvScore,tvBestScore;
-	private LinearLayout root = null;
 	private Button btnNewGame;
 	private GameView gameView;
 	private AnimLayer animLayer = null;

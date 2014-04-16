@@ -34,7 +34,7 @@ public class GameView extends GridLayout {
 
 	private void initGameView(){
 		setColumnCount(Config.LINES);
-		setBackgroundColor(0xffbbada0);
+//		setBackgroundColor(0xffbbada0);
 
 
 		setOnTouchListener(new View.OnTouchListener() {
@@ -78,7 +78,7 @@ public class GameView extends GridLayout {
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-
+		int size = Math.min(w, h);
 		Config.CARD_WIDTH = (Math.min(w, h)-10)/Config.LINES;
 
 		addCards(Config.CARD_WIDTH,Config.CARD_WIDTH);
@@ -161,6 +161,7 @@ public class GameView extends GridLayout {
 						}else if (cardsMap[x][y].equals(cardsMap[x1][y])) {
 							MainHomeActivity.getMainActivity().getAnimLayer().createMoveAnim(cardsMap[x1][y], cardsMap[x][y],x1, x, y, y);
 							cardsMap[x][y].setNum(cardsMap[x][y].getNum()*2);
+							MainHomeActivity.getMainActivity().getAnimLayer().createScaleAnimate(cardsMap[x][y]);
 							cardsMap[x1][y].setNum(0);
 
 							MainHomeActivity.getMainActivity().addScore(cardsMap[x][y].getNum());
@@ -198,6 +199,7 @@ public class GameView extends GridLayout {
 						}else if (cardsMap[x][y].equals(cardsMap[x1][y])) {
 							MainHomeActivity.getMainActivity().getAnimLayer().createMoveAnim(cardsMap[x1][y], cardsMap[x][y],x1, x, y, y);
 							cardsMap[x][y].setNum(cardsMap[x][y].getNum()*2);
+							MainHomeActivity.getMainActivity().getAnimLayer().createScaleAnimate(cardsMap[x][y]);
 							cardsMap[x1][y].setNum(0);
 							MainHomeActivity.getMainActivity().addScore(cardsMap[x][y].getNum());
 							merge = true;
@@ -235,6 +237,7 @@ public class GameView extends GridLayout {
 						}else if (cardsMap[x][y].equals(cardsMap[x][y1])) {
 							MainHomeActivity.getMainActivity().getAnimLayer().createMoveAnim(cardsMap[x][y1],cardsMap[x][y], x, x, y1, y);
 							cardsMap[x][y].setNum(cardsMap[x][y].getNum()*2);
+							MainHomeActivity.getMainActivity().getAnimLayer().createScaleAnimate(cardsMap[x][y]);
 							cardsMap[x][y1].setNum(0);
 							MainHomeActivity.getMainActivity().addScore(cardsMap[x][y].getNum());
 							merge = true;
@@ -272,6 +275,7 @@ public class GameView extends GridLayout {
 						}else if (cardsMap[x][y].equals(cardsMap[x][y1])) {
 							MainHomeActivity.getMainActivity().getAnimLayer().createMoveAnim(cardsMap[x][y1],cardsMap[x][y], x, x, y1, y);
 							cardsMap[x][y].setNum(cardsMap[x][y].getNum()*2);
+							MainHomeActivity.getMainActivity().getAnimLayer().createScaleAnimate(cardsMap[x][y]);
 							cardsMap[x][y1].setNum(0);
 							MainHomeActivity.getMainActivity().addScore(cardsMap[x][y].getNum());
 							merge = true;

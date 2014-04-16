@@ -3,10 +3,13 @@ package com.chuanonly.mergegame;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
@@ -86,6 +89,21 @@ public class AnimLayer extends FrameLayout {
 		sa.setDuration(100);
 		target.setAnimation(null);
 		target.getLabel().startAnimation(sa);
+	}
+	
+	public void createScaleAnimate(Card target){
+		 float scaleSize = 1.05f;
+		AnimationSet animationSet = new AnimationSet(false);
+		ScaleAnimation sa = new ScaleAnimation(1f, scaleSize, 1f, scaleSize, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		sa.setDuration(100);
+		ScaleAnimation sb = new ScaleAnimation(scaleSize, 1f,scaleSize , 1f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+		sb.setDuration(100);
+		sb.setStartOffset(100);
+		animationSet.setStartOffset(30);
+		animationSet.addAnimation(sa);
+		animationSet.addAnimation(sb);
+		target.setAnimation(null);
+		target.getLabel().startAnimation(animationSet);
 	}
 	
 }
