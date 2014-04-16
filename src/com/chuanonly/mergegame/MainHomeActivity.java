@@ -1,6 +1,12 @@
 package com.chuanonly.mergegame;
 
 
+import com.google.ads.Ad;
+import com.google.ads.AdListener;
+import com.google.ads.AdRequest;
+import com.google.ads.InterstitialAd;
+import com.google.ads.AdRequest.ErrorCode;
+
 import android.app.Activity;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -16,12 +22,43 @@ public class MainHomeActivity extends Activity {
 	public MainHomeActivity() {
 		mainActivity = this;
 	}
-
+	 private InterstitialAd interstitial;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-
+		interstitial = new InterstitialAd(this, "a1534d6f6acb6ed");
+		 AdRequest adRequest = new AdRequest();
+		 interstitial.loadAd(adRequest);
+		 interstitial.setAdListener(new AdListener() {
+			@Override
+			public void onReceiveAd(Ad arg0)
+			{
+				if (arg0 == interstitial) {
+				      interstitial.show();
+				    }
+			}
+			
+			@Override
+			public void onPresentScreen(Ad arg0)
+			{
+			}
+			
+			@Override
+			public void onLeaveApplication(Ad arg0)
+			{
+			}
+			
+			@Override
+			public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1)
+			{
+			}
+			
+			@Override
+			public void onDismissScreen(Ad arg0)
+			{
+			}
+		});
 //		root = (RelativeLayout) findViewById(R.id.container);
 //		root.setBackgroundColor(0xfffaf8ef);
 
