@@ -87,13 +87,10 @@ public class MainHomeActivity extends Activity {
 	}
 	private void checkShowAd() {
 		int loginCnt = Util.getIntFromSharedPref(Util.LOG_INT_CNT, 0);
-		if (loginCnt >= 0 && Util.isNetworkAvailable(getApplicationContext()))
+		if (loginCnt >= 2 && Util.isNetworkAvailable(getApplicationContext()))
 		{			
 			if (mAdView == null)
 			{
-				Log.i("fu","初始化");
-				mADLayout.setVisibility(View.VISIBLE);
-				mArrow.setVisibility(View.VISIBLE);
 				mAdView = new AdView(this, AdSize.BANNER, "a1534d6f6acb6ed");
 				mADLayout.addView(mAdView);
 				mAdView.loadAd(new AdRequest());
@@ -101,6 +98,8 @@ public class MainHomeActivity extends Activity {
 					
 					@Override
 					public void onReceiveAd(Ad arg0) {
+						mArrow.setVisibility(View.VISIBLE);
+						mAdView.setVisibility(View.VISIBLE);
 					}
 					
 					@Override
@@ -118,20 +117,21 @@ public class MainHomeActivity extends Activity {
 					public void onDismissScreen(Ad arg0) {
 						Util.setIntToSharedPref(Util.LOG_INT_CNT, -2);
 						mAdView.setVisibility(View.GONE);
-						
+						mArrow.setVisibility(View.GONE);
 					}
 				});
 			}else
 			{
-				mADLayout.setVisibility(View.VISIBLE);
 				mArrow.setVisibility(View.VISIBLE);
-				Log.i("fu","show");
+				mAdView.setVisibility(View.VISIBLE);
 			}
 		}else
 		{
-			mADLayout.setVisibility(View.GONE);
 			mArrow.setVisibility(View.GONE);
-			Log.i("fu","no");
+			if (mAdView != null)
+			{				
+				mAdView.setVisibility(View.GONE);
+			}
 		}
 		Util.setIntToSharedPref(Util.LOG_INT_CNT, loginCnt+1);
 		
@@ -157,8 +157,8 @@ public class MainHomeActivity extends Activity {
 				gameView.undo();
 			}else if(v.getId()== R.id.arrow)
 			{
-				mADLayout.setVisibility(View.GONE);
 				mArrow.setVisibility(View.GONE);
+				mAdView.setVisibility(View.GONE);
 			}
 			else if (v.getId() == R.id.icon_setting)
 			{
@@ -339,13 +339,9 @@ public class MainHomeActivity extends Activity {
 		mResultImg.setVisibility(View.VISIBLE);
 		checkShowAd();
 	}
-	public void undo(int undoScore, int undoHignScore) {
+	public void undo(int undoScore) {
 		score = undoScore;
 		showScore();
-		hignScore = undoHignScore;
-		saveBestScore(hignScore);
-		showBestScore(hignScore);
-		
 	}
 	private long lastPressback = 0;
 
@@ -364,5 +360,12 @@ public class MainHomeActivity extends Activity {
 	}
 	public void setUndoBtnEnable(boolean canClick) {
 		mUndoTV.setClickable(canClick);
+		if (canClick)
+		{
+			mUndoTV.setTextColor(0Xffffffff);
+		}else
+		{
+			mUndoTV.setTextColor(0X30ffffff);
+		}
 	}
 }

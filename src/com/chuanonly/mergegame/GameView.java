@@ -146,7 +146,7 @@ public class GameView extends GridLayout {
 
 	private void swipeLeft(){
 		MainHomeActivity.getMainActivity().setUndoBtnEnable(true);
-		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score, MainHomeActivity.getMainActivity().hignScore));
+		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score));
 		boolean merge = false;
 
 		for (int y = 0; y < Config.LINES; y++) {
@@ -187,7 +187,7 @@ public class GameView extends GridLayout {
 	}
 	private void swipeRight(){
 		MainHomeActivity.getMainActivity().setUndoBtnEnable(true);
-		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score, MainHomeActivity.getMainActivity().hignScore));
+		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score));
 		boolean merge = false;
 
 		for (int y = 0; y < Config.LINES; y++) {
@@ -224,7 +224,7 @@ public class GameView extends GridLayout {
 	}
 	private void swipeUp(){
 		MainHomeActivity.getMainActivity().setUndoBtnEnable(true);
-		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score, MainHomeActivity.getMainActivity().hignScore));
+		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score));
 		boolean merge = false;
 
 		for (int x = 0; x < Config.LINES; x++) {
@@ -263,7 +263,7 @@ public class GameView extends GridLayout {
 	}
 	private void swipeDown(){
 		MainHomeActivity.getMainActivity().setUndoBtnEnable(true);
-		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score, MainHomeActivity.getMainActivity().hignScore));
+		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score));
 		boolean merge = false;
 
 		for (int x = 0; x < Config.LINES; x++) {
@@ -345,7 +345,7 @@ public class GameView extends GridLayout {
 					 cardsMap[i][j].setNum(record.nums[i][j]);
 				}
 			}
-			MainHomeActivity.getMainActivity().undo(record.score, record.hignScore);
+			MainHomeActivity.getMainActivity().undo(record.score);
 			if (records.isEmpty())
 			{
 				MainHomeActivity.getMainActivity().setUndoBtnEnable(false);
@@ -367,8 +367,7 @@ public class GameView extends GridLayout {
 				sb.append(cardsMap[i][j].getNum()).append(";");
 			}
 		}
-		sb.append(MainHomeActivity.getMainActivity().score).append(";");
-		sb.append(MainHomeActivity.getMainActivity().hignScore);
+		sb.append(MainHomeActivity.getMainActivity().score);
 		Util.setStringToSharedPref("record", sb.toString());
 	}
 	public void getSaveRecord()
@@ -383,7 +382,7 @@ public class GameView extends GridLayout {
 				{
 					cardsMap[i/Config.LINES][i%Config.LINES].setNum(Integer.valueOf(nums[i]));
 				}
-				MainHomeActivity.getMainActivity().undo(Integer.valueOf(nums[len-2]), Integer.valueOf(nums[len-1]));
+				MainHomeActivity.getMainActivity().undo(Integer.valueOf(nums[len-1]));
 			}
 		} catch (Exception e) {
 		}

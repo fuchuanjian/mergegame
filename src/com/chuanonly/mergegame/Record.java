@@ -4,8 +4,7 @@ package com.chuanonly.mergegame;
 public class Record {
 	public int[][] nums = new int[Config.LINES][Config.LINES];
 	public int score = 0;
-	public int hignScore = 0;
-	public Record(Card[][] cardsMap, int score, int hignScore) 
+	public Record(Card[][] cardsMap, int score) 
 	{
 		for(int i=0; i< Config.LINES; i++)
 		{
@@ -15,7 +14,6 @@ public class Record {
 			}
 		}
 		this.score = score;
-		this.hignScore = score;
 	}
 	
 }
