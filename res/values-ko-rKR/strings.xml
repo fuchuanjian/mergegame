@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">2048</string>
+    <string name="score">분수:</string>
+    <string name="bestscore">최고 점수:</string>
+    <string name="newgame">다시 시작</string>
+    <string name="back">후퇴</string>
+    <string name="toast_exit">종료하려면 버튼을 다시 누릅니다</string>
+</resources>

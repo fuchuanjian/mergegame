@@ -10,6 +10,7 @@ import android.widget.Toast;
 public class Util
 {
     public static final String SPF_SETTING = "setting";
+    public static final String LOG_INT_CNT = "login";
     private static Toast toast;
     public static void showToast(String str) {
        showToast(str, 0);

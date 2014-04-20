@@ -1,19 +1,22 @@
 package com.chuanonly.mergegame;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Point;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.GridLayout;
 
 public class GameView extends GridLayout {
-
+	private LinkedList<Record> records = new LinkedList<Record>();
+	private boolean isPause = true;
 	public GameView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 
@@ -43,7 +46,7 @@ public class GameView extends GridLayout {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-
+				if (isPause == true) return true;
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
 					startX = event.getX();
@@ -84,6 +87,7 @@ public class GameView extends GridLayout {
 		addCards(Config.CARD_WIDTH,Config.CARD_WIDTH);
 
 		startGame();
+		getSaveRecord();
 	}
 
 	private void addCards(int cardWidth,int cardHeight){
@@ -101,7 +105,8 @@ public class GameView extends GridLayout {
 	}
 
 	public void startGame(){
-
+		isPause = false;
+		records.clear();
 		MainHomeActivity aty = MainHomeActivity.getMainActivity();
 		aty.clearScore();
 		aty.showBestScore(aty.getBestScore());
@@ -114,6 +119,7 @@ public class GameView extends GridLayout {
 
 		addRandomNum();
 		addRandomNum();
+		MainHomeActivity.getMainActivity().setUndoBtnEnable(false);
 	}
 
 	private void addRandomNum(){
@@ -139,7 +145,8 @@ public class GameView extends GridLayout {
 
 
 	private void swipeLeft(){
-
+		MainHomeActivity.getMainActivity().setUndoBtnEnable(true);
+		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score, MainHomeActivity.getMainActivity().hignScore));
 		boolean merge = false;
 
 		for (int y = 0; y < Config.LINES; y++) {
@@ -173,14 +180,14 @@ public class GameView extends GridLayout {
 				}
 			}
 		}
-
 		if (merge) {
 			addRandomNum();
 			checkComplete();
 		}
 	}
 	private void swipeRight(){
-
+		MainHomeActivity.getMainActivity().setUndoBtnEnable(true);
+		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score, MainHomeActivity.getMainActivity().hignScore));
 		boolean merge = false;
 
 		for (int y = 0; y < Config.LINES; y++) {
@@ -210,14 +217,14 @@ public class GameView extends GridLayout {
 				}
 			}
 		}
-
 		if (merge) {
 			addRandomNum();
 			checkComplete();
 		}
 	}
 	private void swipeUp(){
-
+		MainHomeActivity.getMainActivity().setUndoBtnEnable(true);
+		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score, MainHomeActivity.getMainActivity().hignScore));
 		boolean merge = false;
 
 		for (int x = 0; x < Config.LINES; x++) {
@@ -249,14 +256,14 @@ public class GameView extends GridLayout {
 				}
 			}
 		}
-
 		if (merge) {
 			addRandomNum();
 			checkComplete();
 		}
 	}
 	private void swipeDown(){
-
+		MainHomeActivity.getMainActivity().setUndoBtnEnable(true);
+		records.addLast(new Record(cardsMap, MainHomeActivity.getMainActivity().score, MainHomeActivity.getMainActivity().hignScore));
 		boolean merge = false;
 
 		for (int x = 0; x < Config.LINES; x++) {
@@ -286,7 +293,6 @@ public class GameView extends GridLayout {
 				}
 			}
 		}
-
 		if (merge) {
 			addRandomNum();
 			checkComplete();
@@ -295,35 +301,91 @@ public class GameView extends GridLayout {
 
 	private void checkComplete(){
 
-		boolean complete = true;
-
+		boolean lose = true;
+		boolean win = false;
 		ALL:
 			for (int y = 0; y < Config.LINES; y++) {
 				for (int x = 0; x < Config.LINES; x++) {
+					if (cardsMap[x][y].getNum() >=MainHomeActivity.SCORE[MainHomeActivity.GAME_MODE])
+					{
+						win = true;
+						break ALL;
+					}
 					if (cardsMap[x][y].getNum()==0||
 							(x>0&&cardsMap[x][y].equals(cardsMap[x-1][y]))||
 							(x<Config.LINES-1&&cardsMap[x][y].equals(cardsMap[x+1][y]))||
 							(y>0&&cardsMap[x][y].equals(cardsMap[x][y-1]))||
 							(y<Config.LINES-1&&cardsMap[x][y].equals(cardsMap[x][y+1]))) {
 
-						complete = false;
+						lose = false;
 						break ALL;
 					}
 				}
 			}
-
-		if (complete) {
-			new AlertDialog.Builder(getContext()).setTitle("你好").setMessage("游戏结束").setPositiveButton("重新开始", new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					startGame();
-				}
-			}).show();
+		if (win)
+		{
+			MainHomeActivity.getMainActivity().winGame();
+			isPause = true;
+		}
+		if (lose) {
+			MainHomeActivity.getMainActivity().loseGame();
+			isPause = true;
 		}
 
 	}
-
+	public void undo()
+	{
+		if(!records.isEmpty())
+		{
+			Record record = records.removeLast();
+			for(int i=0; i< Config.LINES; i++)
+			{
+				for(int j=0; j< Config.LINES; j++)
+				{
+					 cardsMap[i][j].setNum(record.nums[i][j]);
+				}
+			}
+			MainHomeActivity.getMainActivity().undo(record.score, record.hignScore);
+			if (records.isEmpty())
+			{
+				MainHomeActivity.getMainActivity().setUndoBtnEnable(false);
+			}
+		}else
+		{
+			MainHomeActivity.getMainActivity().setUndoBtnEnable(false);
+		}
+	}
 	private Card[][] cardsMap = new Card[Config.LINES][Config.LINES];
 	private List<Point> emptyPoints = new ArrayList<Point>();
+	public void saveRecord()
+	{
+		StringBuffer sb = new StringBuffer();
+		for(int i=0; i< Config.LINES; i++)
+		{
+			for(int j=0; j< Config.LINES; j++)
+			{
+				sb.append(cardsMap[i][j].getNum()).append(";");
+			}
+		}
+		sb.append(MainHomeActivity.getMainActivity().score).append(";");
+		sb.append(MainHomeActivity.getMainActivity().hignScore);
+		Util.setStringToSharedPref("record", sb.toString());
+	}
+	public void getSaveRecord()
+	{
+		try {			
+			String recordStr = Util.getStringFromSharedPref("record", "");
+			if (!TextUtils.isEmpty(recordStr))
+			{			
+				String nums[] = recordStr.split(";");
+				int len = nums.length;
+				for(int i=0; i< len-2; i++)
+				{
+					cardsMap[i/Config.LINES][i%Config.LINES].setNum(Integer.valueOf(nums[i]));
+				}
+				MainHomeActivity.getMainActivity().undo(Integer.valueOf(nums[len-2]), Integer.valueOf(nums[len-1]));
+			}
+		} catch (Exception e) {
+		}
+	}
 }

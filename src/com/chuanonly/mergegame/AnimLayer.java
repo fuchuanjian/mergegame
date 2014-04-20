@@ -104,6 +104,7 @@ public class AnimLayer extends FrameLayout {
 		animationSet.addAnimation(sb);
 		target.setAnimation(null);
 		target.getLabel().startAnimation(animationSet);
+		MainHomeActivity.getMainActivity().playSound(MainHomeActivity.SOUND_BOTTON);
 	}
 	
 }

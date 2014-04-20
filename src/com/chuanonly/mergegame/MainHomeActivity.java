@@ -1,15 +1,38 @@
 package com.chuanonly.mergegame;
 
+import com.google.ads.Ad;
+import com.google.ads.AdListener;
+import com.google.ads.AdRequest;
+import com.google.ads.AdRequest.ErrorCode;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 
 import android.app.Activity;
 import android.content.SharedPreferences.Editor;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 public class MainHomeActivity extends Activity {
-
+	public static int GAME_MODE = 2;
+	public static final int[] SCORE= {1024, 1024, 2048, 4096, Integer.MAX_VALUE};
+	private SoundPlayHelper mSoundPlayHelper;
+	private ImageView mSoundImg;
+	private ImageView mResultImg;
+	private TextView mUndoTV;
+	private LinearLayout mADLayout;
+	private AdView mAdView;
+	private ImageView mArrow;
 	public MainHomeActivity() {
 		mainActivity = this;
 	}
@@ -19,20 +42,145 @@ public class MainHomeActivity extends Activity {
 		setContentView(R.layout.main);
 //		root = (RelativeLayout) findViewById(R.id.container);
 //		root.setBackgroundColor(0xfffaf8ef);
-
 		tvScore = (TextView) findViewById(R.id.tvScore);
 		tvBestScore = (TextView) findViewById(R.id.tvBestScore);
 
 		gameView = (GameView) findViewById(R.id.gameView);
 
 		btnNewGame = (TextView) findViewById(R.id.ok);
-		btnNewGame.setOnClickListener(new View.OnClickListener() {@Override public void onClick(View v) {
-			gameView.startGame();
-		}});
+		btnNewGame.setOnClickListener(mClick);
+		findViewById(R.id.icon_help).setOnClickListener(mClick);
+		findViewById(R.id.icon_setting).setOnClickListener(mClick);
+		mSoundImg = (ImageView) findViewById(R.id.icon_sound);
+		mSoundImg.setOnClickListener(mClick);
+		mUndoTV = (TextView) findViewById(R.id.undo);
+		mUndoTV.setOnClickListener(mClick);
+		mArrow = (ImageView) findViewById(R.id.arrow);
+		mArrow.setOnClickListener(mClick);
 		
+		mResultImg = (ImageView) findViewById(R.id.result_img);
 		animLayer = (AnimLayer) findViewById(R.id.animLayer);
+		int mode = Util.getIntFromSharedPref("mode", 2);
+		setCheckbox(mode);
+		mSoundPlayHelper = new SoundPlayHelper();
+		mSoundPlayHelper.initSounds(this);
+		mSoundPlayHelper.loadSfx(this, R.raw.button, SOUND_BOTTON);
+		
+		//ad
+		mADLayout = (LinearLayout) findViewById(R.id.layout_ad);
 	}
-
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		gameView.getSaveRecord();
+		int sound = Util.getIntFromSharedPref("Sound", 1);
+		if (sound == 1)
+		{
+			playBgMusic();
+			mSoundImg.setImageResource(R.drawable.sound_on);
+		}else
+		{
+			mSoundImg.setImageResource(R.drawable.sound_off);
+		}
+		checkShowAd();
+	}
+	private void checkShowAd() {
+		int loginCnt = Util.getIntFromSharedPref(Util.LOG_INT_CNT, 0);
+		if (loginCnt >= 0 && Util.isNetworkAvailable(getApplicationContext()))
+		{			
+			if (mAdView == null)
+			{
+				Log.i("fu","初始化");
+				mADLayout.setVisibility(View.VISIBLE);
+				mArrow.setVisibility(View.VISIBLE);
+				mAdView = new AdView(this, AdSize.BANNER, "a1534d6f6acb6ed");
+				mADLayout.addView(mAdView);
+				mAdView.loadAd(new AdRequest());
+				mAdView.setAdListener(new AdListener() {
+					
+					@Override
+					public void onReceiveAd(Ad arg0) {
+					}
+					
+					@Override
+					public void onPresentScreen(Ad arg0) {
+					}
+					
+					@Override
+					public void onLeaveApplication(Ad arg0) {
+					}
+					
+					@Override
+					public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
+					}
+					@Override
+					public void onDismissScreen(Ad arg0) {
+						Util.setIntToSharedPref(Util.LOG_INT_CNT, -2);
+						mAdView.setVisibility(View.GONE);
+						
+					}
+				});
+			}else
+			{
+				mADLayout.setVisibility(View.VISIBLE);
+				mArrow.setVisibility(View.VISIBLE);
+				Log.i("fu","show");
+			}
+		}else
+		{
+			mADLayout.setVisibility(View.GONE);
+			mArrow.setVisibility(View.GONE);
+			Log.i("fu","no");
+		}
+		Util.setIntToSharedPref(Util.LOG_INT_CNT, loginCnt+1);
+		
+	}
+	@Override
+	protected void onPause() {
+    	gameView.saveRecord();
+		super.onPause();
+		mSoundPlayHelper.stopBGMusic();
+	}
+	private OnClickListener mClick = new OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			if (v.getId() == R.id.ok)
+			{
+				playSound(SOUND_BOTTON);
+				gameView.startGame();
+				mResultImg.setVisibility(View.INVISIBLE);
+				checkShowAd();
+			}else if (v.getId() == R.id.undo)
+			{
+				playSound(SOUND_BOTTON);
+				gameView.undo();
+			}else if(v.getId()== R.id.arrow)
+			{
+				mADLayout.setVisibility(View.GONE);
+				mArrow.setVisibility(View.GONE);
+			}
+			else if (v.getId() == R.id.icon_setting)
+			{
+				showPopupWindow();
+			}else if (v.getId() == R.id.icon_sound)
+			{
+				int sound = Util.getIntFromSharedPref("Sound", 1);
+				if (sound == 1)
+				{
+					Util.setIntToSharedPref("Sound", 0);
+					mSoundImg.setImageResource(R.drawable.sound_off);
+					stopBgMusic();
+				}else
+				{
+					Util.setIntToSharedPref("Sound", 1);
+					mSoundImg.setImageResource(R.drawable.sound_on);
+					playBgMusic();
+				}
+			}
+			
+		}
+	};
 	public void clearScore(){
 		score = 0;
 		showScore();
@@ -47,6 +195,7 @@ public class MainHomeActivity extends Activity {
 		showScore();
 
 		int maxScore = Math.max(score, getBestScore());
+		hignScore = maxScore;
 		saveBestScore(maxScore);
 		showBestScore(maxScore);
 	}
@@ -69,7 +218,8 @@ public class MainHomeActivity extends Activity {
 		return animLayer;
 	}
 
-	private int score = 0;
+	public int score = 0;
+	public int hignScore = 0;
 	private TextView tvScore,tvBestScore;
 	private TextView btnNewGame;
 	private GameView gameView;
@@ -82,5 +232,137 @@ public class MainHomeActivity extends Activity {
 	}
 
 	public static final String SP_KEY_BEST_SCORE = "bestScore";
+	private PopupWindow mPopupWindowMenu;
+	// 初始化popupwindow
+    private void showPopupWindow() {
+    	if (mPopupWindowMenu == null)
+    	{    		
+    		View view = getLayoutInflater().inflate(R.layout.popup_window_layout, null, false);
+    		mPopupWindowMenu = new PopupWindow(view, RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT, true);
+    		mPopupWindowMenu.setBackgroundDrawable(new ColorDrawable(0));// 点击窗口外消失
+    		mPopupWindowMenu.setFocusable(true);
+    		mPopupWindowMenu.setTouchable(true);
+    		mPopupWindowMenu.setOutsideTouchable(true);// 点击窗口外消失,需要设置背景、焦点、touchable、update\
+    		mPopupWindowMenu.update();
+    		// 设置进入退出动画
+    		mPopupWindowMenu.setAnimationStyle(R.style.popwindow_anim_style);
+    		view.findViewById(R.id.layout1).setOnClickListener(menuClick);
+    		view.findViewById(R.id.layout2).setOnClickListener(menuClick);
+    		view.findViewById(R.id.layout3).setOnClickListener(menuClick);
+    		view.findViewById(R.id.layout4).setOnClickListener(menuClick);
+    	}
+    	mPopupWindowMenu.showAsDropDown(findViewById(R.id.icon_setting), 0, 0);
+    	int mode = Util.getIntFromSharedPref("mode", 2);
+    	setCheckbox(mode);
+    }
+    private void setCheckbox(int index)
+    {
+    	GAME_MODE = index;
+    	if (mPopupWindowMenu != null)
+    	{    		
+    		for (int i = 1; i <= 4; i++)
+    		{
+    			int id = getResources().getIdentifier("checkbox_" + i, "id",
+    					getPackageName());
+    			CheckBox checkBox =	(CheckBox) mPopupWindowMenu.getContentView().findViewById(id);
+    			if (index == i)
+    			{
+    				checkBox.setChecked(true);
+    				
+    			}else
+    			{
+    				checkBox.setChecked(false);
+    			}
+    		}
+    	}
+    	int imgid = getResources().getIdentifier("mode" + index, "drawable",
+				getPackageName());
+    	((ImageView)findViewById(R.id.mode_img)).setImageResource(imgid);
+    	
+    }
+    private OnClickListener menuClick = new OnClickListener() {
+    	
+    	@Override
+    	public void onClick(View v) {
+    		if (v.getId() == R.id.layout1)
+    		{
+    			Util.setIntToSharedPref("mode", 1);
+    			setCheckbox(1);
+    		}else if (v.getId() == R.id.layout2)
+    		{
+    			Util.setIntToSharedPref("mode", 2);
+    			setCheckbox(2);
+    		}else if (v.getId() == R.id.layout3)
+    		{
+    			Util.setIntToSharedPref("mode", 3);
+    			setCheckbox(3);
+    		}else if (v.getId() == R.id.layout4)
+    		{
+    			Util.setIntToSharedPref("mode", 4);
+    			setCheckbox(4);
+    		}
+    	}
+    };
+    protected void onDestroy() 
+    {
+    	mSoundPlayHelper.release();
+    	super.onDestroy();
+    };
+    public static final int  SOUND_BOTTON = 1;
+    public void playBgMusic()
+    {
+    	int sound = Util.getIntFromSharedPref("Sound", 1);
+    	if (sound == 1)
+    	{    		
+    		mSoundPlayHelper.playBGMusic();
+    	}
+    }
+    public void stopBgMusic()
+    {
+    	mSoundPlayHelper.stopBGMusic();
+    }
+    public void playSound(int id)
+    {
+    	int sound = Util.getIntFromSharedPref("Sound", 1);
+    	if (sound == 1)
+    	{    		
+    		mSoundPlayHelper.play(id, 0);
+    	}
+    }
+	public  void winGame() {
+		mResultImg.setImageResource(R.drawable.win);
+		mResultImg.setVisibility(View.VISIBLE);
+		checkShowAd();
+	}
+	public void loseGame() {
+		mResultImg.setImageResource(R.drawable.lose);
+		mResultImg.setVisibility(View.VISIBLE);
+		checkShowAd();
+	}
+	public void undo(int undoScore, int undoHignScore) {
+		score = undoScore;
+		showScore();
+		hignScore = undoHignScore;
+		saveBestScore(hignScore);
+		showBestScore(hignScore);
+		
+	}
+	private long lastPressback = 0;
 
+	@Override
+	public void onBackPressed()
+	{
+		if (lastPressback + 3000 < System.currentTimeMillis())
+		{
+			lastPressback = System.currentTimeMillis();
+			Util.showToast(APP.getContext().getString(
+					R.string.toast_exit));
+		} else
+		{
+			super.onBackPressed();
+		}
+	}
+	public void setUndoBtnEnable(boolean canClick) {
+		mUndoTV.setClickable(canClick);
+	}
 }

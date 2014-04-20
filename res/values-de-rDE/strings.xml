@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">2048</string>
+    <string name="score">Fraktion:</string>
+    <string name="bestscore">Rekord:</string>
+    <string name="newgame">Restart</string>
+    <string name="back">Rückzug</string>
+    <string name="toast_exit">Drücken Sie die Return-Taste, um zu beenden</string>
+</resources>
