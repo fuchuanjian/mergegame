@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.graphics.Point;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.GridLayout;
@@ -303,14 +304,22 @@ public class GameView extends GridLayout {
 
 		boolean lose = true;
 		boolean win = false;
+		
+		CHECK_WIN:
+			for (int y = 0; y < Config.LINES; y++) {
+				for (int x = 0; x < Config.LINES; x++) {
+					if (cardsMap[x][y].getNum() >= MainHomeActivity.SCORE[MainHomeActivity.GAME_MODE])
+					{
+						win = true;
+						break CHECK_WIN;
+					}
+				}
+			}
+		
+		
 		ALL:
 			for (int y = 0; y < Config.LINES; y++) {
 				for (int x = 0; x < Config.LINES; x++) {
-					if (cardsMap[x][y].getNum() >=MainHomeActivity.SCORE[MainHomeActivity.GAME_MODE])
-					{
-						win = true;
-						break ALL;
-					}
 					if (cardsMap[x][y].getNum()==0||
 							(x>0&&cardsMap[x][y].equals(cardsMap[x-1][y]))||
 							(x<Config.LINES-1&&cardsMap[x][y].equals(cardsMap[x+1][y]))||

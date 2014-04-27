@@ -332,11 +332,13 @@ public class MainHomeActivity extends Activity {
 	public  void winGame() {
 		mResultImg.setImageResource(R.drawable.win);
 		mResultImg.setVisibility(View.VISIBLE);
+		setUndoBtnEnable(false);
 		checkShowAd();
 	}
 	public void loseGame() {
 		mResultImg.setImageResource(R.drawable.lose);
 		mResultImg.setVisibility(View.VISIBLE);
+		setUndoBtnEnable(false);
 		checkShowAd();
 	}
 	public void undo(int undoScore) {
