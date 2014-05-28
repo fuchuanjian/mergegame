@@ -368,16 +368,20 @@ public class GameView extends GridLayout {
 	private List<Point> emptyPoints = new ArrayList<Point>();
 	public void saveRecord()
 	{
-		StringBuffer sb = new StringBuffer();
-		for(int i=0; i< Config.LINES; i++)
-		{
-			for(int j=0; j< Config.LINES; j++)
+		try {
+			StringBuffer sb = new StringBuffer();
+			for(int i=0; i< Config.LINES; i++)
 			{
-				sb.append(cardsMap[i][j].getNum()).append(";");
+				for(int j=0; j< Config.LINES; j++)
+				{
+					sb.append(cardsMap[i][j].getNum()).append(";");
+				}
 			}
+			sb.append(MainHomeActivity.getMainActivity().score);
+			Util.setStringToSharedPref("record", sb.toString());
+		} catch (Exception e) {
 		}
-		sb.append(MainHomeActivity.getMainActivity().score);
-		Util.setStringToSharedPref("record", sb.toString());
+		
 	}
 	public void getSaveRecord()
 	{

@@ -1,27 +1,23 @@
 package com.chuanonly.mergegame;
 
-import com.google.ads.Ad;
-import com.google.ads.AdListener;
-import com.google.ads.AdRequest;
-import com.google.ads.AdRequest.ErrorCode;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
-
 import android.app.Activity;
 import android.content.SharedPreferences.Editor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 
 public class MainHomeActivity extends Activity {
 	public static int GAME_MODE = 2;
@@ -86,54 +82,91 @@ public class MainHomeActivity extends Activity {
 		checkShowAd();
 	}
 	private void checkShowAd() {
-		int loginCnt = Util.getIntFromSharedPref(Util.LOG_INT_CNT, 0);
-		if (loginCnt >= 2 && Util.isNetworkAvailable(getApplicationContext()))
-		{			
-			if (mAdView == null)
+		try {
+			if (!Util.isNetworkAvailable(getApplicationContext()))
 			{
-				mAdView = new AdView(this, AdSize.BANNER, "a1534d6f6acb6ed");
-				mADLayout.addView(mAdView);
-				mAdView.loadAd(new AdRequest());
-				mAdView.setAdListener(new AdListener() {
-					
-					@Override
-					public void onReceiveAd(Ad arg0) {
+				mArrow.setVisibility(View.GONE);
+				mAdView.setVisibility(View.GONE);
+				return;
+			}
+			
+			int loginCnt = Util.getIntFromSharedPref(Util.LOG_INT_CNT, 0);
+			if (loginCnt >= 2 && Util.isNetworkAvailable(getApplicationContext()))
+			{			
+				if (mAdView == null)
+				{
+					mAdView = new AdView(this);
+					mAdView.setAdUnitId("a1534d6f6acb6ed");
+					mAdView.setAdSize(AdSize.BANNER);
+					mADLayout.addView(mAdView);
+					AdRequest adRequest = new AdRequest.Builder().build();
+					mAdView.loadAd(adRequest);
+					mArrow.setVisibility(View.GONE);
+					mAdView.setVisibility(View.GONE);
+					mAdView.setAdListener(new AdListener() {
+						@Override
+						public void onAdLoaded() {
+							super.onAdLoaded();
+							isLoadad = true;
+							mArrow.setVisibility(View.VISIBLE);
+							mAdView.setVisibility(View.VISIBLE);
+						}
+						@Override
+						public void onAdClosed() {
+							Util.setIntToSharedPref(Util.LOG_INT_CNT, -2);
+							mAdView.setVisibility(View.GONE);
+							mArrow.setVisibility(View.GONE);
+							super.onAdClosed();
+						}
+					});
+//					mAdView = new AdView(this, AdSize.BANNER, "a1534d6f6acb6ed");
+//					mADLayout.addView(mAdView);
+//					mAdView.loadAd(new AdRequest());
+//					mAdView.setAdListener(new AdListener() {
+//						
+//						@Override
+//						public void onReceiveAd(Ad arg0) {
+//							mArrow.setVisibility(View.VISIBLE);
+//							mAdView.setVisibility(View.VISIBLE);
+//						}
+//						
+//						@Override
+//						public void onPresentScreen(Ad arg0) {
+//						}
+//						
+//						@Override
+//						public void onLeaveApplication(Ad arg0) {
+//						}
+//						
+//						@Override
+//						public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
+//						}
+//						@Override
+//						public void onDismissScreen(Ad arg0) {
+//							Util.setIntToSharedPref(Util.LOG_INT_CNT, -2);
+//							mAdView.setVisibility(View.GONE);
+//							mArrow.setVisibility(View.GONE);
+//						}
+//					});
+				}else
+				{
+					if (isLoadad)
+					{						
 						mArrow.setVisibility(View.VISIBLE);
 						mAdView.setVisibility(View.VISIBLE);
 					}
-					
-					@Override
-					public void onPresentScreen(Ad arg0) {
-					}
-					
-					@Override
-					public void onLeaveApplication(Ad arg0) {
-					}
-					
-					@Override
-					public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
-					}
-					@Override
-					public void onDismissScreen(Ad arg0) {
-						Util.setIntToSharedPref(Util.LOG_INT_CNT, -2);
-						mAdView.setVisibility(View.GONE);
-						mArrow.setVisibility(View.GONE);
-					}
-				});
+				}
 			}else
 			{
-				mArrow.setVisibility(View.VISIBLE);
-				mAdView.setVisibility(View.VISIBLE);
+				mArrow.setVisibility(View.GONE);
+				if (mAdView != null)
+				{				
+					mAdView.setVisibility(View.GONE);
+				}
 			}
-		}else
-		{
-			mArrow.setVisibility(View.GONE);
-			if (mAdView != null)
-			{				
-				mAdView.setVisibility(View.GONE);
-			}
+			Util.setIntToSharedPref(Util.LOG_INT_CNT, loginCnt+1);
+		} catch (Exception e) {
 		}
-		Util.setIntToSharedPref(Util.LOG_INT_CNT, loginCnt+1);
 		
 	}
 	@Override
@@ -142,6 +175,7 @@ public class MainHomeActivity extends Activity {
 		super.onPause();
 		mSoundPlayHelper.stopBGMusic();
 	}
+	private boolean isLoadad = false;
 	private OnClickListener mClick = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
