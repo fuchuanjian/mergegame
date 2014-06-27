@@ -18,6 +18,7 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 
 public class MainHomeActivity extends Activity {
 	public static int GAME_MODE = 2;
@@ -28,6 +29,7 @@ public class MainHomeActivity extends Activity {
 	private TextView mUndoTV;
 	private LinearLayout mADLayout;
 	private AdView mAdView;
+	private InterstitialAd mInterstitialAd;
 	private ImageView mArrow;
 	public MainHomeActivity() {
 		mainActivity = this;
@@ -113,41 +115,11 @@ public class MainHomeActivity extends Activity {
 						}
 						@Override
 						public void onAdClosed() {
-							Util.setIntToSharedPref(Util.LOG_INT_CNT, -2);
 							mAdView.setVisibility(View.GONE);
 							mArrow.setVisibility(View.GONE);
 							super.onAdClosed();
 						}
 					});
-//					mAdView = new AdView(this, AdSize.BANNER, "a1534d6f6acb6ed");
-//					mADLayout.addView(mAdView);
-//					mAdView.loadAd(new AdRequest());
-//					mAdView.setAdListener(new AdListener() {
-//						
-//						@Override
-//						public void onReceiveAd(Ad arg0) {
-//							mArrow.setVisibility(View.VISIBLE);
-//							mAdView.setVisibility(View.VISIBLE);
-//						}
-//						
-//						@Override
-//						public void onPresentScreen(Ad arg0) {
-//						}
-//						
-//						@Override
-//						public void onLeaveApplication(Ad arg0) {
-//						}
-//						
-//						@Override
-//						public void onFailedToReceiveAd(Ad arg0, ErrorCode arg1) {
-//						}
-//						@Override
-//						public void onDismissScreen(Ad arg0) {
-//							Util.setIntToSharedPref(Util.LOG_INT_CNT, -2);
-//							mAdView.setVisibility(View.GONE);
-//							mArrow.setVisibility(View.GONE);
-//						}
-//					});
 				}else
 				{
 					if (isLoadad)
@@ -165,6 +137,28 @@ public class MainHomeActivity extends Activity {
 				}
 			}
 			Util.setIntToSharedPref(Util.LOG_INT_CNT, loginCnt+1);
+			
+			if ( loginCnt % 5 == 4)
+			{
+				if (mInterstitialAd == null)
+				{
+					mInterstitialAd = new InterstitialAd(this);
+					mInterstitialAd.setAdUnitId("a1534d6f6acb6ed");
+				}
+				AdRequest adRequest = new AdRequest.Builder().build();
+				mInterstitialAd.loadAd(adRequest);
+				mInterstitialAd.setAdListener(new AdListener() {
+					@Override
+					public void onAdLoaded() {
+						super.onAdLoaded();
+						if (mInterstitialAd.isLoaded())
+						{
+							mInterstitialAd.show();
+						}
+					}
+				});
+				
+			}
 		} catch (Exception e) {
 		}
 		
